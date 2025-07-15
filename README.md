@@ -19,6 +19,7 @@ Or via Yalc (for local testing):
 npx yalc add oly-charts
 npm install
 
+# WalkinTraffic Chart
 
 🛠 Usage
 
@@ -77,6 +78,78 @@ export default function Dashboard() {
     </div>
   );
 }
+
+
+# FootFallHeatMap
+
+**Interactive Treemap Heatmap component built with Recharts for React.**  
+Supports drill-down, badges, custom styling, and icon rendering.
+
+## ✨ Features
+
+- 📊 Customizable Treemap chart
+- 🔍 Drill-down navigation
+- 🏷️ Optional badges for additional data
+- 🎨 Flexible styling and theming
+- ⚡ Fast and lightweight
+
+🛠 Usage
+
+import { FootFallHeatMap } from 'footfall-heatmap';
+
+const sampleData = [
+  {
+    name: "North Region",
+    value: 35.5,
+    color: "#0086A9",
+    overallData: { stores: 15, count: 1250 },
+    list: [
+      { name: "Store A", value: 20, color: "#005577", overallData: { stores: 1, count: 400 } },
+      { name: "Store B", value: 15.5, color: "#006688", overallData: { stores: 1, count: 350 } }
+    ]
+  },
+  {
+    name: "South Region",
+    value: 28.3,
+    color: "#FF6B35",
+    overallData: { stores: 12, count: 980 }
+  },
+  {
+    name: "East Region",
+    value: 22.1,
+    color: "#4CAF50",
+    overallData: { stores: 8, count: 750 }
+  },
+  {
+    name: "West Region",
+    value: 14.1,
+    color: "#9C27B0",
+    overallData: { stores: 6, count: 520 }
+  }
+];
+
+<FootFallHeatMap
+  data={data}
+  height={400}
+  enableDrillDown
+  showBadges
+  styling={{
+    fontSize: 16,
+    valueFormatter: (value) => `${value} users`,
+  }}
+/>
+
+| Prop                | Type                               | Description                           |
+| ------------------- | ---------------------------------- | ------------------------------------- |
+| `data`              | `TreeMapDataItem[]`                | Treemap input data                    |
+| `height`            | `number`                           | Height of the chart                   |
+| `width`             | `string`                           | Width of the chart (default: 100%)    |
+| `styling`           | `TreeMapStyling`                   | Custom styling options                |
+| `onItemClick`       | `(item, index) => void`            | Click handler for blocks              |
+| `renderCustomIcons` | `(item, size, color) => ReactNode` | Custom icon renderer                  |
+| `enableDrillDown`   | `boolean`                          | Enable drill-down into sub-data       |
+| `showBadges`        | `boolean`                          | Show badge info (e.g., stores, count) |
+
 
 🤝 Contributing
 Fork the repo
