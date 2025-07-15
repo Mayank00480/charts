@@ -1,5 +1,8 @@
+
+
 # 📊 Oly Charts
 
+# WalkinTraffic Chart
 A customizable React chart component using Recharts and MUI, designed to display walk-in traffic with both bar and line graphs. Ideal for dashboards and analytics platforms.
 
 ## ✨ Features
@@ -10,16 +13,7 @@ A customizable React chart component using Recharts and MUI, designed to display
 - 🧠 Built with TypeScript
 - ⚛️ Responsive and interactive
 
-## 📦 Installation
 
-```bash
-npm install oly-charts
-
-Or via Yalc (for local testing):
-npx yalc add oly-charts
-npm install
-
-# WalkinTraffic Chart
 
 🛠 Usage
 
@@ -154,7 +148,7 @@ const sampleData = [
 🤝 Contributing
 Fork the repo
 
-Create your feature branch: git checkout -b feature/foo
+Create your feature branch: git checkout -b feature/
 
 Commit your changes: git commit -m 'Add feature'
 
@@ -162,3 +156,11 @@ Push to the branch: git push origin feature/foo
 
 Open a Pull Request
 
+## 📦 Installation
+
+```bash
+npm install oly-charts
+
+Or via Yalc (for local testing):
+npx yalc add oly-charts
+npm install
