@@ -70,7 +70,6 @@ export interface WalkinTrafficChartProps {
   data: DataItem[];
   timeFrame?: TimeFrame;
   height?: number;
-  title?: string;
   style?: React.CSSProperties;
   styling?: ChartStyling;
 }
@@ -79,12 +78,10 @@ export const WalkinTrafficChart: React.FC<WalkinTrafficChartProps> = ({
   data,
   timeFrame = "Month",
   height = 430,
-  title = "Walk-in Traffic",
   style,
   styling = {}
 }) => {
   const [activeIndex, setActiveIndex] = useState<number | null>(null);
-  const [barHovered, setBarHovered] = useState<boolean>(false);
   const cardRef = useRef<HTMLDivElement | null>(null);
   const [chartWidth, setChartWidth] = useState<number>(0);
 
@@ -140,12 +137,10 @@ export const WalkinTrafficChart: React.FC<WalkinTrafficChartProps> = ({
   }, [data]);
 
   const handleMouseEnter = (_: any, index: number) => {
-    setBarHovered(true);
     setActiveIndex(index);
   };
 
   const handleMouseLeave = () => {
-    setBarHovered(false);
     setActiveIndex(null);
   };
 

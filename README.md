@@ -72,7 +72,6 @@ export default function Dashboard() {
       <WalkinTrafficChart
         data={data}
         timeFrame="Week"
-        title="Weekly Walk-in Traffic"
         styling={chartStyling}
       />
     </div>
