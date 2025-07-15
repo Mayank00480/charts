@@ -1,0 +1,49 @@
+{
+  "name": "oly-charts",
+  "version": "1.0.0",
+  "description": "This contains oly charts",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.esm.js",
+  "types": "dist/types/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "rollup -c",
+    "dev": "rollup -c -w"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Mayank00480/charts.git"
+  },
+  "keywords": [
+    "Oly-charts"
+  ],
+  "author": "mayank",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Mayank00480/charts/issues"
+  },
+  "homepage": "https://github.com/Mayank00480/charts#readme",
+  "peerDependencies": {
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-commonjs": "^28.0.6",
+    "@rollup/plugin-node-resolve": "^16.0.1",
+    "@rollup/plugin-typescript": "^12.1.4",
+    "@types/react": "^19.1.8",
+    "@types/react-dom": "^19.1.6",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "rollup": "^4.45.0",
+    "rollup-plugin-peer-deps-external": "^2.2.4",
+    "tslib": "^2.8.1",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@mui/material": "^7.2.0",
+    "recharts": "^3.1.0"
+  }
+}
