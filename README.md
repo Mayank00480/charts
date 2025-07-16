@@ -83,6 +83,59 @@ export default function Dashboard() {
   );
 }
 
+📊 TopStoresChart
+A flexible and responsive horizontal bar chart component built with React, MUI, and TypeScript, used to display top store visitor distributions by dynamic segments or predefined age groups.
+
+🚀 Features
+🎨 Stacked horizontal bars for each store’s segment distribution
+
+🧠 Toggleable age group mapping (default: ON)
+
+💡 Dynamic labels and tooltips for clarity
+
+📱 Fully responsive design
+
+⚙️ Built with TypeScript & Material UI
+
+interface StoreData {
+  store: string;
+  data: { name: string; data: number[] }[];
+  total: number;
+}
+
+interface TopStoresChartProps {
+  data: StoreData[];             // Visitor data for each store
+  colors: string[];              // Color palette for segments
+  title?: string;                // Optional chart title
+  subtitle?: string;             // Optional chart subtitle
+  useAgeGroupMapping?: boolean; // Whether to map age groups or use raw data
+}
+
+📦 Age Group Mapping (Optional)
+Enabled by default via useAgeGroupMapping = true, the following groups are calculated based on naming patterns:
+
+Infants (0–2 Years)
+
+Kids (3–12 Years)
+
+Teens (13–21 Years)
+
+Youths (22–35 Years)
+
+Mature (35+ Years)
+
+If disabled (false), the chart will use the provided data.name fields as labels directly.
+
+🧪 Example Usage
+
+<TopStoresChart
+  data={storeData}
+  colors={["#FF6384", "#36A2EB", "#FFCE56", "#4BC0C0", "#9966FF"]}
+  title="Top 5 Stores"
+  subtitle="Visitors"
+  useAgeGroupMapping={true}
+/>
+
 🌍 FootFallHeatMap
 Interactive Treemap Heatmap component built with Recharts for React.
 Supports drill-down, badges, custom styling, and icon rendering.
