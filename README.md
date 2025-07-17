@@ -28,7 +28,7 @@ A customizable React chart component designed to display walk-in traffic with bo
 🛠 Usage
 
 import React from "react";
-import { WalkinTrafficChart } from "oly-charts";
+import { WalkinTrafficChart } from "my-oly-charts";
 
 const data = [
   { name: 50, line: 45, x_axis: "Mon" },
@@ -153,62 +153,87 @@ Supports drill-down, badges, custom styling, and icon rendering.
 
 🛠 Usage
 
-import { FootFallHeatMap } from 'footfall-heatmap';
+import { FootFallHeatMap } from 'my-oly-charts';
 
 const sampleData = [
   {
-    name: "North Region",
-    value: 35.5,
-    color: "#0086A9",
-    overallData: { stores: 15, count: 1250 },
+    name: 'North Region',
+    value: 45.5,
+    color: '#3f51b5', // Optional: specify color in data
+    overallData: {
+      stores: 25,
+      count: 1250
+    },
     list: [
-      { name: "Store A", value: 20, color: "#005577", overallData: { stores: 1, count: 400 } },
-      { name: "Store B", value: 15.5, color: "#006688", overallData: { stores: 1, count: 350 } }
+      {
+        name: 'Delhi',
+        value: 25.2,
+        overallData: { stores: 12, count: 650 },
+        list: [
+          { name: 'Mall 1', value: 15.1, overallData: { stores: 1, count: 320 } },
+          { name: 'Mall 2', value: 10.1, overallData: { stores: 1, count: 330 } }
+        ]
+      },
+      {
+        name: 'Mumbai',
+        value: 20.3,
+        overallData: { stores: 13, count: 600 }
+      }
     ]
   },
   {
-    name: "South Region",
-    value: 28.3,
-    color: "#FF6B35",
-    overallData: { stores: 12, count: 980 }
+    name: 'South Region',
+    value: 35.2,
+    color: '#4CAF50', // Optional: specify color in data
+    overallData: {
+      stores: 18,
+      count: 920
+    },
+    list: [
+      {
+        name: 'Bangalore',
+        value: 20.1,
+        overallData: { stores: 10, count: 500 }
+      },
+      {
+        name: 'Chennai',
+        value: 15.1,
+        overallData: { stores: 8, count: 420 }
+      }
+    ]
   },
   {
-    name: "East Region",
-    value: 22.1,
-    color: "#4CAF50",
-    overallData: { stores: 8, count: 750 }
-  },
-  {
-    name: "West Region",
-    value: 14.1,
-    color: "#9C27B0",
-    overallData: { stores: 6, count: 520 }
+    name: 'East Region',
+    value: 19.3,
+    overallData: {
+      stores: 12,
+      count: 580
+    },
+
   }
 ];
 
 <FootFallHeatMap
-  data={sampleData}
-  height={400}
-  enableDrillDown
-  showBadges
-  styling={{
-    fontSize: 16,
-    valueFormatter: (value) => `${value} users`,
-  }}
+  data={yourData}
+  onItemClick={(item) => console.log(item)}
+  colors={['#2196F3', '#4CAF50', '#FF9800']}
+  height={500}
+  enableDrillDown={true}
+  showBreadcrumb={true}
 />
 
 📘 Props
 
-| Prop                | Type                               | Description                           |
-| ------------------- | ---------------------------------- | ------------------------------------- |
-| `data`              | `TreeMapDataItem[]`                | Treemap input data                    |
-| `height`            | `number`                           | Height of the chart                   |
-| `width`             | `string`                           | Width of the chart (default: 100%)    |
-| `styling`           | `TreeMapStyling`                   | Custom styling options                |
-| `onItemClick`       | `(item, index) => void`            | Click handler for blocks              |
-| `renderCustomIcons` | `(item, size, color) => ReactNode` | Custom icon renderer                  |
-| `enableDrillDown`   | `boolean`                          | Enable drill-down into sub-data       |
-| `showBadges`        | `boolean`                          | Show badge info (e.g., stores, count) |
+| Prop              | Type                        | Default        | Description                                    |
+| ----------------- | --------------------------- | -------------- | ---------------------------------------------- |
+| `data`            | `TreeMapDataItem[]`         | **Required**   | Hierarchical data to render in the tree map.   |
+| `colors`          | `string[]`                  | Built-in theme | List of color hex codes used for nodes.        |
+| `height`          | `number`                    | `450`          | Height of the chart container.                 |
+| `onItemClick`     | `(item, index) => void`     | -              | Callback when a node is clicked.               |
+| `enableDrillDown` | `boolean`                   | `true`         | Whether to enable drill-down on node click.    |
+| `showBreadcrumb`  | `boolean`                   | `true`         | Display breadcrumb path when drilling down.    |
+| `formatValue`     | `(value: number) => string` | `x.xx%`        | Custom formatter for node values.              |
+| `threshold`       | `number`                    | `0.01` (1%)    | Minimum percent of total to ensure visibility. |
 
 🤝 Contributing
 Fork the repo

@@ -1,6 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import type { JSX } from 'react';
 import { ResponsiveContainer, Treemap } from 'recharts';
+import { Box, Typography, IconButton } from '@mui/material';
+import { ArrowBack } from '@mui/icons-material';
 
+// Types
 export interface TreeMapDataItem {
   name: string;
   value: number;
@@ -12,255 +16,112 @@ export interface TreeMapDataItem {
     count?: number;
     [key: string]: any;
   };
+  chartData?: any[];
   [key: string]: any;
 }
 
-export interface TreeMapStyling {
-  // Container styling
-  backgroundColor?: string;
-  borderRadius?: number;
-  borderColor?: string;
-  borderWidth?: number;
-  
-  // Text styling
-  fontFamily?: string;
-  textColor?: string;
-  fontSize?: number;
-  fontWeight?: number;
-  valueFontWeight?: number;
-  
-  // Hover effects
-  hoverTransform?: string;
-  hoverTransition?: string;
-  
-  // Icon styling
-  iconSize?: number;
-  
-  // Badge styling
-  badgeBackgroundColor?: string;
-  badgeTextColor?: string;
-  badgeBorderRadius?: number;
-  badgePadding?: string;
-  badgeBoxShadow?: string;
-  
-  // Layout
-  padding?: number;
-  gap?: number;
-  
-  // Animation
-  enableAnimation?: boolean;
-  animationDuration?: number;
-  
-  // Custom formatting
-  valueFormatter?: (value: number) => string;
-}
-
-export interface TreeMapProps {
+export interface SimpleTreeMapProps {
   data: TreeMapDataItem[];
+  colors?: string[];
   height?: number;
-  width?: string;
-  styling?: TreeMapStyling;
   onItemClick?: (item: TreeMapDataItem, index: number) => void;
-  renderCustomIcons?: (item: TreeMapDataItem, iconSize: number, color: string) => React.ReactNode;
   enableDrillDown?: boolean;
-  showBadges?: boolean;
-  className?: string;
-  style?: React.CSSProperties;
+  showBreadcrumb?: boolean;
+  formatValue?: (value: number) => string;
+  threshold?: number; // Minimum percentage for visibility
 }
 
-export const FootFallHeatMap: React.FC<TreeMapProps> = ({
+// Default props
+const defaultColors = [
+  '#3f51b5', '#4CAF50', '#FF9800', '#9C27B0', '#F44336',
+  '#2196F3', '#FF5722', '#795548', '#607D8B', '#E91E63'
+];
+
+const defaultFormatValue = (value: number): string => {
+  if (typeof value !== "number") return "0%";
+  const formatted = value.toFixed(2);
+  const trimmed = formatted.replace(/\.?0+$/, "");
+  return `${trimmed}%`;
+};
+
+const SimpleTreeMap: React.FC<SimpleTreeMapProps> = ({
   data,
+  colors = defaultColors,
   height = 450,
-  width = "100%",
-  styling = {},
   onItemClick,
-  renderCustomIcons,
-  enableDrillDown = false,
-  showBadges = true,
-  className,
-  style
+  enableDrillDown = true,
+  showBreadcrumb = true,
+  formatValue = defaultFormatValue,
+  threshold = 0.01 // 1%
 }) => {
-  const [processedData, setProcessedData] = useState<TreeMapDataItem[]>([]);
+  const [currentData, setCurrentData] = useState<TreeMapDataItem[]>(data);
   const [navigationHistory, setNavigationHistory] = useState<TreeMapDataItem[][]>([]);
+  const [breadcrumbPath, setBreadcrumbPath] = useState<string[]>([]);
 
-  // Simple default values - no complex calculations
-  const defaultValues = {
-    backgroundColor: "#ffffff",
-    borderRadius: 12,
-    borderColor: "#ffffff",
-    borderWidth: 1,
-    fontFamily: "Noto Sans, sans-serif",
-    textColor: "#ffffff",
-    fontSize: 18,
-    fontWeight: 500,
-    valueFontWeight: 700,
-    hoverTransform: "scale(1.10)",
-    hoverTransition: "transform 0.5s ease-in-out",
-    iconSize: 20,
-    badgeBackgroundColor: "#f4f4f4",
-    badgeTextColor: "#333",
-    badgeBorderRadius: 10,
-    badgePadding: "6px 10px",
-    badgeBoxShadow: "0 4px 8px rgba(0, 0, 0, 0.1)",
-    padding: 16,
-    gap: 8,
-    enableAnimation: false,
-    animationDuration: 0,
-    valueFormatter: (value: number) => {
-      if (typeof value !== "number") return "0%";
-      const formatted = value.toFixed(2);
-      const trimmed = formatted.replace(/\.?0+$/, "");
-      return `${trimmed}%`;
+  // Reset when data changes
+  useEffect(() => {
+    setCurrentData(data);
+    setNavigationHistory([]);
+    setBreadcrumbPath([]);
+  }, [data]);
+
+  // Preprocess data to ensure minimum visibility and add colors
+  const processedData = useMemo(() => {
+    if (!currentData || !Array.isArray(currentData) || currentData.length === 0) {
+      return [];
     }
-  };
 
-  // Simple merge - use parent value or default
-  const finalStyling = {
-    backgroundColor: styling.backgroundColor ?? defaultValues.backgroundColor,
-    borderRadius: styling.borderRadius ?? defaultValues.borderRadius,
-    borderColor: styling.borderColor ?? defaultValues.borderColor,
-    borderWidth: styling.borderWidth ?? defaultValues.borderWidth,
-    fontFamily: styling.fontFamily ?? defaultValues.fontFamily,
-    textColor: styling.textColor ?? defaultValues.textColor,
-    fontSize: styling.fontSize ?? defaultValues.fontSize,
-    fontWeight: styling.fontWeight ?? defaultValues.fontWeight,
-    valueFontWeight: styling.valueFontWeight ?? defaultValues.valueFontWeight,
-    hoverTransform: styling.hoverTransform ?? defaultValues.hoverTransform,
-    hoverTransition: styling.hoverTransition ?? defaultValues.hoverTransition,
-    iconSize: styling.iconSize ?? defaultValues.iconSize,
-    badgeBackgroundColor: styling.badgeBackgroundColor ?? defaultValues.badgeBackgroundColor,
-    badgeTextColor: styling.badgeTextColor ?? defaultValues.badgeTextColor,
-    badgeBorderRadius: styling.badgeBorderRadius ?? defaultValues.badgeBorderRadius,
-    badgePadding: styling.badgePadding ?? defaultValues.badgePadding,
-    badgeBoxShadow: styling.badgeBoxShadow ?? defaultValues.badgeBoxShadow,
-    padding: styling.padding ?? defaultValues.padding,
-    gap: styling.gap ?? defaultValues.gap,
-    enableAnimation: styling.enableAnimation ?? defaultValues.enableAnimation,
-    animationDuration: styling.animationDuration ?? defaultValues.animationDuration,
-    valueFormatter: styling.valueFormatter ?? defaultValues.valueFormatter
-  };
+    const totalValue = currentData.reduce((sum, item) => sum + (item.value || 0), 0);
+    const minThreshold = totalValue * threshold;
 
-  // Data preprocessing to ensure minimum size representation
-  const preprocessData = useCallback((inputData: TreeMapDataItem[]) => {
-    if (!inputData || !Array.isArray(inputData)) return [];
-
-    const processedData = [...inputData];
-    const totalValue = processedData.reduce((sum, item) => sum + item.value, 0);
-    const threshold = totalValue * 0.05;
-
-    return processedData.map((item) => ({
+    return currentData.map((item, index) => ({
       ...item,
       originalValue: item.originalValue || item.value,
-      value: item.value < threshold ? threshold : item.value,
+      value: item.value < minThreshold ? minThreshold : item.value,
+      color: item.color || colors[index % colors.length],
     }));
-  }, []);
+  }, [currentData, colors, threshold]);
 
-  // Initialize processed data
-  React.useEffect(() => {
-    setProcessedData(preprocessData(data));
-  }, [data, preprocessData]);
+  // Handle item click
+  const handleItemClick = (item: TreeMapDataItem, index: number) => {
+    // Call parent callback if provided
+    onItemClick?.(item, index);
 
-  const handleItemClick = useCallback((item: TreeMapDataItem, index: number) => {
-    if (onItemClick) {
-      onItemClick(item, index);
+    // Handle drill-down
+    if (enableDrillDown && item.list && Array.isArray(item.list) && item.list.length > 0) {
+      setNavigationHistory(prev => [...prev, currentData]);
+      setBreadcrumbPath(prev => [...prev, item.name]);
+      setCurrentData(item.list);
     }
+  };
 
-    if (enableDrillDown && item.list) {
-      setNavigationHistory(prev => [...prev, processedData]);
-      setProcessedData(preprocessData(item.list));
-    }
-  }, [onItemClick, enableDrillDown, processedData, preprocessData]);
-
-  const handleGoBack = useCallback(() => {
+  // Handle back navigation
+  const handleGoBack = () => {
     if (navigationHistory.length > 0) {
-      const previousData = navigationHistory[navigationHistory.length - 1];
-      setProcessedData(previousData);
+      const previous = navigationHistory[navigationHistory.length - 1];
+      setCurrentData(previous);
       setNavigationHistory(prev => prev.slice(0, -1));
+      setBreadcrumbPath(prev => prev.slice(0, -1));
     }
-  }, [navigationHistory]);
+  };
 
-  const renderCustomizedContent = (props: any): React.ReactElement => {
+  // Custom content renderer
+  const renderCustomizedContent = (props: any): JSX.Element => {
     const { x, y, width, height, name, index } = props;
     const currentItem = processedData[index];
-    const color = currentItem?.color || "#0086A9";
-    const originalValue = currentItem?.originalValue || currentItem?.value;
+    
+    if (!currentItem) return <div></div>;
 
-    // Simple responsive logic - no complex calculations
-    const isSmall = width < 120 || height < 80;
-    const adjustedFontSize = isSmall ? Math.max(finalStyling.fontSize * 0.7, 12) : finalStyling.fontSize;
-    const adjustedIconSize = isSmall ? Math.max(finalStyling.iconSize * 0.8, 14) : finalStyling.iconSize;
-    const adjustedPadding = isSmall ? Math.max(finalStyling.padding * 0.5, 8) : finalStyling.padding;
-
-    const containerStyle: React.CSSProperties = {
-      backgroundColor: color,
-      color: finalStyling.textColor,
-      padding: `${adjustedPadding}px`,
-      textAlign: 'center',
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: isSmall && width > height ? 'row' : 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      cursor: 'pointer',
-      overflow: 'hidden',
-      border: `${finalStyling.borderWidth}px solid ${finalStyling.borderColor}`,
-      gap: `${finalStyling.gap}px`,
-      borderRadius: `${finalStyling.borderRadius}px`,
-      transition: finalStyling.hoverTransition,
-      fontFamily: finalStyling.fontFamily
-    };
-
-    const nameStyle: React.CSSProperties = {
-      fontSize: `${adjustedFontSize}px`,
-      fontWeight: finalStyling.fontWeight,
-      color: finalStyling.textColor,
-      whiteSpace: 'nowrap',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      maxWidth: '100%',
-      margin: 0
-    };
-
-    const valueStyle: React.CSSProperties = {
-      fontSize: `${adjustedFontSize}px`,
-      fontWeight: finalStyling.valueFontWeight,
-      textAlign: 'center',
-      color: finalStyling.textColor,
-      margin: 0
-    };
-
-    const badgeContainerStyle: React.CSSProperties = {
-      display: 'flex',
-      flexDirection: 'row',
-      justifyContent: 'center',
-      alignItems: 'center',
-      flexWrap: 'wrap',
-      gap: `${finalStyling.gap}px`
-    };
-
-    const badgeStyle: React.CSSProperties = {
-      backgroundColor: finalStyling.badgeBackgroundColor,
-      color: finalStyling.badgeTextColor,
-      padding: finalStyling.badgePadding,
-      borderRadius: `${finalStyling.badgeBorderRadius}px`,
-      boxShadow: finalStyling.badgeBoxShadow,
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px'
-    };
-
-    const iconContainerStyle: React.CSSProperties = {
-      backgroundColor: '#ffffff',
-      borderRadius: '50%',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      width: `${adjustedIconSize + 4}px`,
-      height: `${adjustedIconSize + 4}px`
-    };
-
-    const badgeFontSize = Math.max(adjustedFontSize * 0.7, 10);
+    const { color, originalValue, overallData } = currentItem;
+    
+    // Responsive sizing
+    const isLarge = width > 180 && height > 150;
+    const isMedium = width > 100 && height > 100;
+    const isSmall = !isLarge && !isMedium;
+    
+    const fontSize = isLarge ? 18 : isMedium ? 14 : 12;
+    const iconSize = isLarge ? 20 : isMedium ? 16 : 14;
+    const padding = isLarge ? 16 : isMedium ? 12 : 8;
 
     return (
       <foreignObject
@@ -268,113 +129,157 @@ export const FootFallHeatMap: React.FC<TreeMapProps> = ({
         y={y}
         width={width}
         height={height}
-        style={{ borderRadius: `${finalStyling.borderRadius}px`, overflow: 'hidden' }}
+        style={{ borderRadius: '8px', overflow: 'hidden' }}
       >
-        <div
-          style={containerStyle}
+        <Box
           onClick={() => handleItemClick(currentItem, index)}
-          onMouseEnter={(e) => {
-            if (finalStyling.hoverTransform) {
-              e.currentTarget.style.transform = finalStyling.hoverTransform;
-            }
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'none';
+          sx={{
+            backgroundColor: color,
+            color: '#fff',
+            padding: `${padding}px`,
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            borderRadius: '8px',
+            border: '1px solid rgba(255,255,255,0.2)',
+            transition: 'all 0.2s ease',
+            '&:hover': {
+              transform: 'scale(1.05)',
+              boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+            },
+            gap: isSmall ? 0.5 : 1,
           }}
         >
-          <div style={{
-            display: 'flex',
-            flexDirection: isSmall ? 'row' : 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            gap: `${finalStyling.gap}px`,
-            marginBottom: isSmall ? '4px' : '8px'
-          }}>
-            <p style={nameStyle} title={name}>
+          {/* Name and Value */}
+          <Box sx={{ textAlign: 'center', mb: isSmall ? 0.5 : 1 }}>
+            <Typography
+              sx={{
+                fontSize: `${fontSize}px`,
+                fontWeight: 500,
+                whiteSpace: 'nowrap',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                maxWidth: '100%',
+                mb: 0.5,
+              }}
+              title={name}
+            >
               {name}
-            </p>
-            <p style={valueStyle}>
-              {finalStyling.valueFormatter(originalValue)}
-            </p>
-          </div>
+            </Typography>
+            <Typography
+              sx={{
+                fontSize: `${fontSize}px`,
+                fontWeight: 700,
+              }}
+            >
+              {formatValue(originalValue)}
+            </Typography>
+          </Box>
 
-          {showBadges && currentItem?.overallData && (width > 100 && height > 60) && (
-            <div style={badgeContainerStyle}>
-              {currentItem.overallData.stores && (
-                <div style={badgeStyle}>
-                  <div style={iconContainerStyle}>
-                    {renderCustomIcons ? 
-                      renderCustomIcons(currentItem, adjustedIconSize, color) :
-                      <span style={{ fontSize: `${adjustedIconSize}px`, color }}>🏪</span>
-                    }
-                  </div>
-                  <span style={{ fontSize: `${badgeFontSize}px`, fontWeight: 600 }}>
-                    {currentItem.overallData.stores}
-                  </span>
-                </div>
+          {/* Badges - only show if there's enough space */}
+          {!isSmall && overallData && (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: width > height ? 'row' : 'column',
+                gap: 0.5,
+                alignItems: 'center',
+                flexWrap: 'wrap',
+              }}
+            >
+              {overallData.stores && (
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: color,
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: '12px',
+                    fontSize: `${fontSize * 0.75}px`,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                  }}
+                >
+                  🏪 {overallData.stores}
+                </Box>
               )}
-              
-              {currentItem.overallData.count && (
-                <div style={badgeStyle}>
-                  <div style={iconContainerStyle}>
-                    {renderCustomIcons ? 
-                      renderCustomIcons(currentItem, adjustedIconSize, color) :
-                      <span style={{ fontSize: `${adjustedIconSize}px`, color }}>👥</span>
-                    }
-                  </div>
-                  <span style={{ fontSize: `${badgeFontSize}px`, fontWeight: 600 }}>
-                    {currentItem.overallData.count}
-                  </span>
-                </div>
+              {overallData.count && (
+                <Box
+                  sx={{
+                    backgroundColor: 'rgba(255,255,255,0.9)',
+                    color: color,
+                    px: 1,
+                    py: 0.5,
+                    borderRadius: '12px',
+                    fontSize: `${fontSize * 0.75}px`,
+                    fontWeight: 600,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 0.5,
+                  }}
+                >
+                  👥 {overallData.count}
+                </Box>
               )}
-            </div>
+            </Box>
           )}
-        </div>
+        </Box>
       </foreignObject>
     );
   };
 
-  const containerStyle: React.CSSProperties = {
-    width: width,
-    ...style
-  };
-
   return (
-    <div className={className} style={containerStyle}>
-      {enableDrillDown && navigationHistory.length > 0 && (
-        <div style={{ marginBottom: '16px' }}>
-          <button
+    <Box sx={{ width: '100%', height: '100%' }}>
+      {/* Breadcrumb */}
+      {showBreadcrumb && breadcrumbPath.length > 0 && (
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1,
+            mb: 2,
+            p: 1,
+            backgroundColor: 'rgba(0,0,0,0.05)',
+            borderRadius: 1,
+          }}
+        >
+          <IconButton
             onClick={handleGoBack}
-            style={{
-              padding: '8px 16px',
-              backgroundColor: '#0086A9',
+            size="small"
+            sx={{
+              backgroundColor: 'primary.main',
               color: 'white',
-              border: 'none',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontFamily: finalStyling.fontFamily
+              '&:hover': { backgroundColor: 'primary.dark' },
             }}
           >
-            ← Go Back
-          </button>
-        </div>
+            <ArrowBack />
+          </IconButton>
+          <Typography variant="body2" color="text.secondary">
+            {breadcrumbPath.join(' > ')}
+          </Typography>
+        </Box>
       )}
-      
+
+      {/* TreeMap */}
       <ResponsiveContainer width="100%" height={height}>
         <Treemap
           data={processedData}
           dataKey="value"
-          stroke={finalStyling.borderColor}
-          fill={finalStyling.backgroundColor}
-          content={renderCustomizedContent as any}
-          isAnimationActive={finalStyling.enableAnimation}
-          animationDuration={finalStyling.animationDuration}
+          stroke="rgba(255,255,255,0.2)"
+          fill="#f5f5f5"
+          content={renderCustomizedContent}
+          isAnimationActive={false}
           aspectRatio={4 / 3}
-          style={{ borderRadius: `${finalStyling.borderRadius}px` }}
         />
       </ResponsiveContainer>
-    </div>
+    </Box>
   );
 };
 
-export default FootFallHeatMap;
+export default SimpleTreeMap;
