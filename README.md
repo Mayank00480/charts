@@ -235,6 +235,47 @@ const sampleData = [
 | `formatValue`     | `(value: number) => string` | `x.xx%`        | Custom formatter for node values.              |
 | `threshold`       | `number`                    | `0.01` (1%)    | Minimum percent of total to ensure visibility. |
 
+
+ResponsivePieChart
+
+📱 Responsive Design: Adapts to screen sizes with dynamic radius scaling.
+
+🎨 Custom Colors: Pass your own color palette via the colors prop.
+
+💬 Custom Tooltips: Shows detailed information on hover.
+
+
+🛠 Usage
+
+const data = [
+  { name: "Male", value: 45, count: 4500 },
+  { name: "Female", value: 52, count: 5200 },
+  { name: "Other", value: 3, count: 300 }
+];
+
+const colors = [
+  { color: "#3B82F6" },
+  { color: "#EC4899" }, 
+  { color: "#10B981" }
+];
+
+<ResponsivePieChart data={data} colors={colors} showLabels = {false} pieRadius={120} />
+
+| Prop                | Type                  | Default               | Description                                    |
+| ------------------- | --------------------- | --------------------- | ---------------------------------------------- |
+| `data`              | `DataItem[]`          | *required*            | Chart data with `name`, `value`, and `count`.  |
+| `colors`            | `ColorConfig[]`       | *required*            | Array of color configs for each slice.         |
+| `title`             | `string`              | `"Pie Chart"`         | Title displayed above the chart.               |
+| `height` / `width`  | `string \| number`    | `"100%"`              | Chart/container dimensions.                    |
+| `showCard`          | `boolean`             | `true`                | Wrap the chart in a styled Material UI `Card`. |
+| `cardStyle`         | `React.CSSProperties` | `{}`                  | Custom styles for the card.                    |
+| `pieRadius`         | `number`              | `150`                 | Base radius of the pie (auto-scales).          |
+| `showTooltip`       | `boolean`             | `true`                | Enable/disable tooltip display.                |
+| `showLegend`        | `boolean`             | `true`                | Show a color-coded legend.                     |
+| `showLabels`        | `boolean`             | `true`                | Show labels on slices.                         |
+| `emptyStateMessage` | `string`              | `"No data available"` | Message shown when `data` is empty or invalid. |
+
+
 🤝 Contributing
 Fork the repo
 
