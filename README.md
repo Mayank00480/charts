@@ -275,6 +275,37 @@ const colors = [
 | `showLabels`        | `boolean`             | `true`                | Show labels on slices.                         |
 | `emptyStateMessage` | `string`              | `"No data available"` | Message shown when `data` is empty or invalid. |
 
+StatsBanner
+
+Positive, negative, or neutral trend icons (customizable)
+
+Fully responsive layout with mobile optimizations
+
+Customizable background and text colors
+
+🛠 Usage
+
+<StatsBanner
+  title="Users"
+  value={2450}
+  changeText="Increased"
+  changePercentage={12.5}
+/>
+
+
+| Prop               | Type                     | Description                                             |
+| ------------------ | ------------------------ | ------------------------------------------------------- |
+| `title`            | `string`                 | Label/title of the stat                                 |
+| `value`            | `string \| number`       | Main value to display                                   |
+| `changeText`       | `string` *(optional)*    | Text to indicate the type of change (e.g., "Increased") |
+| `changePercentage` | `number` *(optional)*    | Percentage change shown in value                        |
+| `backgroundColor`  | `string` *(optional)*    | Background color of the banner (default: `#4290b1`)     |
+| `textColor`        | `string` *(optional)*    | Text color (default: white)                             |
+| `width`            | `string` *(optional)*    | Width of the banner (default: `100%`)                   |
+| `upArrowIcon`      | `ReactNode` *(optional)* | Custom icon for positive change                         |
+| `downArrowIcon`    | `ReactNode` *(optional)* | Custom icon for negative change                         |
+| `neutralIcon`      | `ReactNode` *(optional)* | Custom icon for neutral/no change                       |
+
 
 🤝 Contributing
 Fork the repo
